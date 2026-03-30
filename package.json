@@ -1,0 +1,29 @@
+{
+  "name": "zaplogs",
+  "version": "1.0.0",
+  "description": "Tool for quick personalized FRC robot log visualization, downloading and cloud uploading",
+  "homepage": "https://github.com/1156UnderControl/ZapLogs#readme",
+  "bugs": {
+    "url": "https://github.com/1156UnderControl/ZapLogs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1156UnderControl/ZapLogs.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "electron": "^41.1.0",
+    "typescript": "^6.0.2"
+  }
+}
