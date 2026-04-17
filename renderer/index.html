@@ -1,18 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <title>electron test</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZapLogs</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <p>👋</p>
+
+    <!-- ── Header ── -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        ZapLogs
+      </div>
+      <div class="header-right">
+        <span id="drive-badge" class="drive-badge">Drive</span>
+        <div id="status-badge" class="status-badge disconnected">
+          <span class="status-dot"></span>
+          <span id="status-text">Not connected</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Current operation bar ── -->
+    <div id="op-bar" class="hidden">
+      <span id="op-label" class="op-label">—</span>
+      <div class="progress-track">
+        <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+      </div>
+      <span id="progress-pct" class="progress-pct">0%</span>
+    </div>
+
+    <!-- ── Main ── -->
+    <main>
+
+      <!-- Activity log -->
+      <section id="activity">
+        <div class="panel-header">
+          <span>Activity</span>
+          <button id="btn-scan" class="btn" style="width:auto;padding:3px 10px;font-size:11px">Scan now</button>
+        </div>
+        <div id="log-list"></div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settings-panel">
+        <div class="panel-header">
+          <span>Settings</span>
+        </div>
+        <div class="settings-scroll">
+
+          <!-- Robot -->
+          <div class="settings-section">
+            <div class="settings-section-title">Robot Connection</div>
+
+            <div class="field">
+              <label>Robot Address</label>
+              <input id="f-robot-addr" type="text" placeholder="10.TE.AM.2 or roborio-TEAM-frc.local" />
+            </div>
+
+            <div class="toggle-field">
+              <span class="toggle-label">USB mode (172.22.11.2)</span>
+              <label class="toggle">
+                <input id="f-use-usb" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Remote log path</label>
+              <input id="f-remote-path" type="text" placeholder="/U/logs" />
+            </div>
+
+            <div class="field">
+              <label>Poll interval (ms)</label>
+              <input id="f-poll-interval" type="number" min="1000" step="1000" placeholder="5000" />
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Download -->
+          <div class="settings-section">
+            <div class="settings-section-title">Download</div>
+
+            <div class="toggle-field">
+              <span class="toggle-label">Auto-download new files</span>
+              <label class="toggle">
+                <input id="f-auto-download" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Local save folder</label>
+              <div class="field-row">
+                <input id="f-local-path" type="text" placeholder="~/ZapLogs" readonly />
+                <button id="btn-pick-dir" class="btn" style="width:auto;white-space:nowrap">Browse</button>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button id="btn-clear" class="btn danger">Clear history</button>
+            </div>
+          </div>
+
+          <hr class="divider" />
+
+          <!-- Drive -->
+          <div class="settings-section">
+            <div class="settings-section-title">Google Drive</div>
+
+            <div class="toggle-field">
+              <span class="toggle-label">Auto-upload after download</span>
+              <label class="toggle">
+                <input id="f-auto-upload" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Drive root folder name</label>
+              <input id="f-drive-folder" type="text" placeholder="ZapLogs" />
+            </div>
+
+            <div class="toggle-field">
+              <span class="toggle-label">Competition mode</span>
+              <label class="toggle">
+                <input id="f-comp-mode" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div id="comp-name-row" class="field" style="display:none">
+              <label>Competition name (used as subfolder)</label>
+              <input id="f-comp-name" type="text" placeholder="e.g. District Qualifier 2025" />
+            </div>
+
+            <hr class="divider" />
+
+            <div class="drive-auth-section">
+              <p id="drive-status-txt" class="drive-status-text">
+                Not connected. Add your OAuth credentials below, then click Connect.
+              </p>
+              <button id="btn-auth"   class="btn primary" style="margin-bottom:6px">Connect Google Drive</button>
+              <button id="btn-revoke" class="btn danger"  style="display:none">Disconnect Drive</button>
+            </div>
+
+            <div class="field">
+              <label>OAuth Client ID</label>
+              <input id="f-client-id" type="text" placeholder="…apps.googleusercontent.com" />
+              <p class="help-text">
+                Create a Desktop OAuth 2.0 client in Google Cloud Console.<br>
+                Add <code style="color:var(--blue)">http://localhost:42813</code> as redirect URI.
+              </p>
+            </div>
+
+            <div class="field">
+              <label>OAuth Client Secret</label>
+              <input id="f-client-secret" type="password" placeholder="GOCSPX-…" />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="settings-footer">
+          <button id="btn-save" class="btn primary">Save settings</button>
+        </div>
+      </section>
+
+    </main>
+
+    <script src="renderer.js" defer></script>
   </body>
 </html>
