@@ -1,18 +1,312 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <title>electron test</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZapLogs</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <p>👋</p>
+
+    <!-- ── Header ── -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        ZapLogs
+      </div>
+      <div class="header-right">
+        <span id="drive-badge" class="drive-badge">Drive</span>
+        <div id="status-badge" class="status-badge disconnected">
+          <span class="status-dot"></span>
+          <span id="status-text">Not connected</span>
+        </div>
+        <button id="btn-open-settings" class="btn-icon" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <path d="M7.5 9.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M12.3 7.5c0-.2 0-.4-.02-.6l1.28-1a.5.5 0 0 0 .12-.63l-1.21-2.1a.5.5 0 0 0-.61-.22l-1.5.6a4.5 4.5 0 0 0-1.04-.6L9.1 1.54A.5.5 0 0 0 8.6 1H6.4a.5.5 0 0 0-.5.43l-.22 1.5a4.5 4.5 0 0 0-1.04.6l-1.5-.6a.5.5 0 0 0-.6.22L1.32 5.27a.5.5 0 0 0 .12.63l1.28 1A4.6 4.6 0 0 0 2.7 7.5c0 .2 0 .4.02.6l-1.28 1a.5.5 0 0 0-.12.63l1.21 2.1c.13.22.4.3.61.22l1.5-.6c.32.23.67.43 1.04.6l.22 1.51c.06.24.28.43.5.43h2.2a.5.5 0 0 0 .5-.43l.22-1.5c.37-.17.72-.37 1.04-.6l1.5.6a.5.5 0 0 0 .6-.22l1.22-2.1a.5.5 0 0 0-.12-.63l-1.28-1Z" stroke="currentColor" stroke-width="1.2"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Progress bar ── -->
+    <div id="op-bar" class="hidden">
+      <span id="op-label" class="op-label">—</span>
+      <div class="progress-track">
+        <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+      </div>
+      <span id="progress-pct" class="progress-pct">0%</span>
+    </div>
+
+    <!-- ── Activity view ── -->
+    <main id="view-main">
+      <section id="activity">
+        <div class="panel-header">
+          <span>Activity</span>
+          <button id="btn-scan" class="btn-sm">Scan now</button>
+        </div>
+        <div id="log-list"></div>
+      </section>
+    </main>
+
+    <!-- ── Settings page ── -->
+    <div id="view-settings" class="hidden">
+
+      <!-- Left sidebar nav -->
+      <nav class="sp-sidebar">
+        <div class="sp-sidebar-head">Settings</div>
+        <button class="sp-nav active" data-sec="robot">
+          <span class="sp-nav-icon">
+            <svg width="14" height="14" viewBox="0 0 15 15" fill="none">
+              <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M7.5 4v3.5l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          Robot Connection
+        </button>
+        <button class="sp-nav" data-sec="download">
+          <span class="sp-nav-icon">
+            <svg width="14" height="14" viewBox="0 0 15 15" fill="none">
+              <path d="M7.5 1v9M4 7l3.5 3.5L11 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          Download
+        </button>
+        <button class="sp-nav" data-sec="drive">
+          <span class="sp-nav-icon">
+            <svg width="14" height="14" viewBox="0 0 15 15" fill="none">
+              <path d="M1.5 10.5l2.5-5h7.5l2.5 5H1.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M5 10.5l1.5-5M10 10.5L8.5 5.5" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+          </span>
+          Google Drive
+        </button>
+      </nav>
+
+      <!-- Right content -->
+      <div class="sp-body">
+
+        <!-- ── Robot section ── -->
+        <section id="sp-robot" class="sp-section">
+          <div class="sp-section-header">
+            <h2>Robot Connection</h2>
+            <p>Configure how ZapLogs finds and connects to your roboRIO over FTP.</p>
+          </div>
+
+          <div class="sp-card">
+            <div class="sp-card-title">Address</div>
+
+            <div class="field">
+              <label>Robot Address</label>
+              <input id="f-robot-addr" type="text" placeholder="10.TE.AM.2 or roborio-TEAM-frc.local" />
+              <p class="help-text">Use your team's IP format, e.g. <code>10.11.56.2</code> for team 1156. Leading zeros are stripped automatically.</p>
+            </div>
+
+            <div class="toggle-field">
+              <div>
+                <span class="toggle-label">USB Mode</span>
+                <p class="help-text" style="margin-top:2px">Use fixed USB address <code>172.22.11.2</code> instead</p>
+              </div>
+              <label class="toggle">
+                <input id="f-use-usb" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="sp-card">
+            <div class="sp-card-title">FTP Settings</div>
+
+            <div class="field">
+              <label>Remote log path</label>
+              <input id="f-remote-path" type="text" placeholder="/U/logs" />
+            </div>
+
+            <div class="field">
+              <label>Poll interval</label>
+              <div class="field-row">
+                <input id="f-poll-interval" type="number" min="1000" step="500" placeholder="5000" style="max-width:100px" />
+                <span class="field-unit">ms</span>
+              </div>
+              <p class="help-text">How often to check for new files. 5000 ms = 5 s.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Download section ── -->
+        <section id="sp-download" class="sp-section hidden">
+          <div class="sp-section-header">
+            <h2>Download</h2>
+            <p>Where log files are saved locally and which file types to auto-download.</p>
+          </div>
+
+          <div class="sp-card">
+            <div class="sp-card-title">Behavior</div>
+
+            <div class="toggle-field">
+              <div>
+                <span class="toggle-label">Auto-download new files</span>
+                <p class="help-text" style="margin-top:2px">Automatically download any new log file found on the roboRIO</p>
+              </div>
+              <label class="toggle">
+                <input id="f-auto-download" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="sp-card">
+            <div class="sp-card-title">Save Location</div>
+
+            <div class="field">
+              <label>Local folder</label>
+              <div class="field-row">
+                <input id="f-local-path" type="text" placeholder="~/ZapLogs" readonly />
+                <button id="btn-pick-dir" class="btn" style="width:auto;white-space:nowrap;flex-shrink:0">Browse…</button>
+              </div>
+              <p class="help-text">Log files are saved here after download. Supported formats: .wpilog, .rlog, .hoot, .revlog, .wpilogxz</p>
+            </div>
+          </div>
+
+          <div class="sp-card sp-card-danger">
+            <div class="sp-card-title" style="color:var(--red)">Danger Zone</div>
+            <p class="help-text" style="margin-bottom:10px">
+              ZapLogs tracks which files have already been downloaded. Clearing this history causes all files currently on the roboRIO to be downloaded again on the next connection.
+            </p>
+            <button id="btn-clear" class="btn danger" style="width:auto">Clear download history</button>
+          </div>
+        </section>
+
+        <!-- ── Drive section ── -->
+        <section id="sp-drive" class="sp-section hidden">
+          <div class="sp-section-header">
+            <h2>Google Drive</h2>
+            <p>Automatically upload downloaded logs to Google Drive, organized by date or competition.</p>
+          </div>
+
+          <div class="sp-card">
+            <div class="sp-card-title">Upload Settings</div>
+
+            <div class="toggle-field">
+              <div>
+                <span class="toggle-label">Auto-upload after download</span>
+                <p class="help-text" style="margin-top:2px">Upload each file to Drive immediately after it downloads</p>
+              </div>
+              <label class="toggle">
+                <input id="f-auto-upload" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="field" style="margin-top:10px">
+              <label>Drive root folder name</label>
+              <input id="f-drive-folder" type="text" placeholder="ZapLogs" style="max-width:240px" />
+              <p class="help-text">Files are organized as <code>ZapLogs / YYYY-MM-DD / filename</code></p>
+            </div>
+          </div>
+
+          <div class="sp-card">
+            <div class="sp-card-title">Competition Mode</div>
+
+            <div class="toggle-field">
+              <div>
+                <span class="toggle-label">Competition mode</span>
+                <p class="help-text" style="margin-top:2px">Group files into a named competition folder instead of daily folders</p>
+              </div>
+              <label class="toggle">
+                <input id="f-comp-mode" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div id="comp-name-row" class="field" style="margin-top:10px;display:none">
+              <label>Competition name</label>
+              <input id="f-comp-name" type="text" placeholder="e.g. District Qualifier 2025" style="max-width:300px" />
+              <p class="help-text">Files will be uploaded to <code>ZapLogs / District Qualifier 2025 / filename</code></p>
+            </div>
+          </div>
+
+          <div class="sp-card" id="drive-connect-card">
+            <div class="sp-card-title">Connection</div>
+
+            <!-- Connected state -->
+            <div id="drive-connected-state" class="hidden">
+              <div class="drive-connected-banner">
+                <svg width="16" height="16" viewBox="0 0 15 15" fill="none">
+                  <path d="M1.5 10.5l2.5-5h7.5l2.5 5H1.5Z" stroke="var(--green)" stroke-width="1.2" stroke-linejoin="round"/>
+                  <path d="M5 10.5l1.5-5M10 10.5L8.5 5.5" stroke="var(--green)" stroke-width="1.2"/>
+                </svg>
+                <span>Connected to Google Drive</span>
+              </div>
+              <button id="btn-revoke" class="btn danger" style="width:auto;margin-top:10px">Disconnect</button>
+            </div>
+
+            <!-- Not connected state -->
+            <div id="drive-setup-state">
+              <div class="setup-guide">
+                <div class="guide-step">
+                  <div class="guide-num">1</div>
+                  <div class="guide-content">
+                    <div class="guide-title">Enable the Google Drive API</div>
+                    <div class="guide-desc">
+                      Open <strong>console.cloud.google.com</strong>, create or select a project, then go to
+                      <em>APIs &amp; Services → Library</em> and enable <strong>Google Drive API</strong>.
+                    </div>
+                  </div>
+                </div>
+                <div class="guide-step">
+                  <div class="guide-num">2</div>
+                  <div class="guide-content">
+                    <div class="guide-title">Create OAuth 2.0 Credentials</div>
+                    <div class="guide-desc">
+                      Go to <em>APIs &amp; Services → Credentials → Create Credentials → OAuth 2.0 Client ID</em>.
+                      Choose <strong>Desktop app</strong> as the application type.
+                      Add <code class="code-pill">http://localhost:42813</code> as a redirect URI.
+                    </div>
+                  </div>
+                </div>
+                <div class="guide-step">
+                  <div class="guide-num">3</div>
+                  <div class="guide-content">
+                    <div class="guide-title">Paste your credentials &amp; connect</div>
+                    <div class="guide-desc">
+                      Copy the Client ID and Client Secret from the credentials page and paste them below.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>OAuth Client ID</label>
+                <input id="f-client-id" type="text" placeholder="123456789-xxxx.apps.googleusercontent.com" />
+              </div>
+
+              <div class="field">
+                <label>OAuth Client Secret</label>
+                <input id="f-client-secret" type="password" placeholder="GOCSPX-…" />
+                <p class="help-text">Save your settings first, then click Connect. Your browser will open for authorization.</p>
+              </div>
+
+              <button id="btn-auth" class="btn primary" style="width:auto;margin-top:4px">
+                Connect Google Drive
+              </button>
+            </div>
+          </div>
+
+        </section><!-- /drive -->
+
+      </div><!-- /sp-body -->
+
+      <!-- Footer -->
+      <div class="sp-footer">
+        <button id="btn-cancel" class="btn" style="width:auto">Cancel</button>
+        <button id="btn-save" class="btn primary" style="width:auto;padding:8px 22px">Save settings</button>
+      </div>
+
+    </div><!-- /view-settings -->
+
+    <script src="renderer.js" defer></script>
   </body>
 </html>
