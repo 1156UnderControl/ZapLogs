@@ -23,6 +23,7 @@ class ZapLogs {
   private drive = new DriveUploader();
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private busy = false;
+  private connState: "none" | "connecting" | "connected" | "disconnected" = "none";
 
   private downloadedFiles: Set<string>;
   private historyPath: string;
@@ -82,6 +83,9 @@ class ZapLogs {
     ipcMain.handle("save-preferences", (_e, partial: Record<string, unknown>) => {
       this.prefs.update(partial);
       this.initDrive();
+      // Reset connection state so the user sees a fresh attempt with the new address
+      this.connState = "none";
+      this.ftp.disconnect();
       this.restartPolling();
       return true;
     });
@@ -128,6 +132,12 @@ class ZapLogs {
     }
   }
 
+  private emitConn(next: "connecting" | "connected" | "disconnected", address: string): void {
+    if (this.connState === next) return;
+    this.connState = next;
+    this.emit(next, { address });
+  }
+
   // ── Polling ───────────────────────────────────────────────────────────────
 
   private startPolling(): void {
@@ -155,15 +165,20 @@ class ZapLogs {
     const p = this.prefs.get();
     const address = p.useUSB ? USB_ADDRESS : normalizeIP(p.robotAddress);
 
-    this.emit("connecting", { address });
+    // Only show "connecting" on the very first attempt — avoid flashing "Connecting…"
+    // every poll when the roboRIO isn't reachable.
+    if (this.connState === "none") {
+      this.emitConn("connecting", address);
+    }
+
     const ok = await this.ftp.connect(address);
 
     if (!ok) {
-      this.emit("disconnected", { address });
+      this.emitConn("disconnected", address);
       return;
     }
 
-    this.emit("connected", { address });
+    this.emitConn("connected", address);
 
     if (!p.autoDownload) return;
 

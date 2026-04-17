@@ -15,8 +15,10 @@ export interface DownloadProgress {
   total: number;
 }
 
+const FTP_TIMEOUT_MS = 3000;
+
 export class FTPDownloader {
-  private client: Client = new Client(10000);
+  private client: Client = new Client(FTP_TIMEOUT_MS);
   private _connected = false;
 
   get isConnected(): boolean {
@@ -36,7 +38,7 @@ export class FTPDownloader {
 
     try {
       if (!this.client.closed) this.client.close();
-      this.client = new Client(10000);
+      this.client = new Client(FTP_TIMEOUT_MS);
       this.client.ftp.verbose = false;
       await this.client.access({ host, user: "anonymous", password: "" });
       this._connected = true;

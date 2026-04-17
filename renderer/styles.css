@@ -11,7 +11,7 @@
   --blue: #58a6ff;
   --yellow: #d29922;
   --purple: #bc8cff;
-  --radius: 8px;
+  --radius: 4px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,7 +56,7 @@ header {
   width: 22px;
   height: 22px;
   background: var(--blue);
-  border-radius: 5px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,7 +74,7 @@ header {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 3px;
   background: var(--bg);
   border: 1px solid var(--border);
   font-size: 12px;
@@ -112,7 +112,7 @@ header {
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 4px;
   color: var(--muted);
   cursor: pointer;
   transition: all 0.15s;
@@ -169,15 +169,29 @@ header {
 /* ══════════════════════════════════════════════
    MAIN VIEWS  (activity / settings are siblings)
 ══════════════════════════════════════════════ */
-#view-main,
-#view-settings {
+#view-main {
   flex: 1;
   overflow: hidden;
   display: flex;
 }
+#view-main.hidden { display: none; }
 
-#view-main.hidden,
+#view-settings {
+  flex: 1;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "sidebar body"
+    "footer  footer";
+  background: var(--bg);
+}
 #view-settings.hidden { display: none; }
+
+.sp-sidebar { grid-area: sidebar; }
+.sp-body    { grid-area: body; }
+.sp-footer  { grid-area: footer; }
 
 /* ══════════════════════════════════════════════
    ACTIVITY LOG
@@ -210,7 +224,7 @@ header {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  border-radius: 6px;
+  border-radius: 3px;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -254,23 +268,11 @@ header {
 /* ══════════════════════════════════════════════
    SETTINGS PAGE
 ══════════════════════════════════════════════ */
-#view-settings {
-  background: var(--bg);
-  flex-direction: column;
-}
-
-/* sidebar + body row */
-.sp-inner {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
 
 /* ── Sidebar ── */
 .sp-sidebar {
-  width: 200px;
-  flex-shrink: 0;
   border-right: 1px solid var(--border);
+  overflow-y: auto;
   background: var(--surface);
   display: flex;
   flex-direction: column;
@@ -337,9 +339,9 @@ header {
 .sp-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px 20px;
-  margin-bottom: 16px;
+  border-radius: 4px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
 }
 .sp-card-danger {
   border-color: #3d1717;
@@ -419,8 +421,8 @@ header {
 
 .toggle {
   position: relative;
-  width: 34px;
-  height: 20px;
+  width: 32px;
+  height: 18px;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -429,22 +431,25 @@ header {
   position: absolute;
   inset: 0;
   background: var(--border);
-  border-radius: 20px;
+  border-radius: 3px;
   transition: background 0.2s;
 }
 .slider::before {
   content: "";
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   left: 3px;
   top: 3px;
   background: #fff;
-  border-radius: 50%;
+  border-radius: 2px;
   transition: transform 0.2s;
 }
 .toggle input:checked + .slider              { background: var(--blue); }
 .toggle input:checked + .slider::before     { transform: translateX(14px); }
+
+/* flatten the guide-num circle into a small square badge */
+.guide-num { border-radius: 3px !important; }
 
 .btn {
   display: inline-flex;

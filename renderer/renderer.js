@@ -71,6 +71,8 @@ document.querySelectorAll(".sp-nav").forEach(btn => {
     document.querySelectorAll(".sp-section").forEach(s => s.classList.add("hidden"));
     btn.classList.add("active");
     document.getElementById("sp-" + btn.dataset.sec).classList.remove("hidden");
+    const body = document.querySelector(".sp-body");
+    if (body) body.scrollTop = 0;
   });
 });
 
@@ -79,6 +81,8 @@ function openSettings() {
   viewMain.classList.add("hidden");
   viewSettings.classList.remove("hidden");
   btnOpenSettings.classList.add("active");
+  const body = document.querySelector(".sp-body");
+  if (body) body.scrollTop = 0;
 }
 
 function closeSettings() {
